@@ -10,21 +10,23 @@ export function activate(context: vscode.ExtensionContext) {
 	const disposableCommand = vscode.commands.registerCommand('vsball.startBall', () => {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
-		vscode.window.showInformationMessage('Ball started');
+		vscode.window.showInformationMessage('Ball started!!');
 		vscode.commands.executeCommand("vsballView.focus");
 	});
 	const disposableWebview = vscode.window.registerWebviewViewProvider(
 		"vsballView",
-		new MyWebviewViewProvider(context)
+		new MyWebviewViewProvider(context.extensionUri)
 	);
-	context.subscriptions.push(disposableCommand,disposableWebview);
+	context.subscriptions.push(disposableCommand, disposableWebview);
 }
 
 // This method is called when your extension is deactivated
 export function deactivate() { }
 
 export class MyWebviewViewProvider implements vscode.WebviewViewProvider {
-	constructor(private context: vscode.ExtensionContext) { }
+	constructor(
+		private readonly _extensionUri: vscode.Uri,
+	) { }
 
 	resolveWebviewView(
 		webviewView: vscode.WebviewView,
@@ -34,8 +36,7 @@ export class MyWebviewViewProvider implements vscode.WebviewViewProvider {
 		webviewView.webview.options = {
 			enableScripts: true,
 		};
-
-		webviewView.webview.html = this.getWebviewContent();
+		webviewView.webview.html = this.getWebviewContent(webviewView.webview);
 
 		webviewView.webview.onDidReceiveMessage(async (message) => {
 			switch (message.command) {
@@ -45,24 +46,53 @@ export class MyWebviewViewProvider implements vscode.WebviewViewProvider {
 			}
 		});
 	}
-	getWebviewContent() {
-		return `
-				<!DOCTYPE html>
-				<html>
-				<body>
-					<h1>Hello from Side Panel!</h1>
-					<button onclick="sendMessage()">Send Message</button>
-					<script>
-						const vscode = acquireVsCodeApi();
-						function sendMessage() {
-							vscode.postMessage({
-								command: 'showMessage',
-								text: 'Hello from Webview!'
-							});
-						}
-					</script>
-				</body>
-				</html>
-			`;
+	getWebviewContent(webview: vscode.Webview) {
+		const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'main.js'));
+
+		// Do the same for the stylesheet.
+		const stylesUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'styles.css'));
+		const ballUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'ball.svg'));
+		const nonce = getNonce();
+
+		return `<!DOCTYPE html>
+			<html lang="en">
+			<head>
+				<meta charset="UTF-8">
+
+				<!--
+					Use a content security policy to only allow loading styles from our extension directory,
+					and only allow scripts that have a specific nonce.
+					(See the 'webview-sample' extension sample for img-src content security policy examples)
+				-->
+				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; img-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
+
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+				<link href="${stylesUri}" rel="stylesheet">
+
+				<title>Cat Colors</title>
+			</head>
+			<body id="body">
+				<img src="${ballUri}" />
+				<div id="canvasContainer">
+                    <canvas id="ballCanvas"></canvas>
+                    <canvas id="foregroundEffectCanvas"></canvas>
+                    <canvas id="backgroundEffectCanvas"></canvas>
+                </div>
+				<div id="background"></div>
+				<p>"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever s"</p>
+
+				<script nonce="${nonce}" src="${scriptUri}"></script>
+			</body>
+			</html>`;
 	}
+}
+
+function getNonce() {
+	let text = '';
+	const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	for (let i = 0; i < 32; i++) {
+		text += possible.charAt(Math.floor(Math.random() * possible.length));
+	}
+	return text;
 }
