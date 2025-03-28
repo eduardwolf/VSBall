@@ -73,26 +73,23 @@ export class MyWebviewViewProvider implements vscode.WebviewViewProvider {
 				<title>Cat Colors</title>
 			</head>
 			<body id="body">
-				<img src="${ballUri}" />
 				<div id="canvasContainer">
-                    <canvas id="ballCanvas"></canvas>
-                    <canvas id="foregroundEffectCanvas"></canvas>
-                    <canvas id="backgroundEffectCanvas"></canvas>
+                    <canvas id="playerCanvas"></canvas>
+                    <canvas id="backgroundCanvas"></canvas>
                 </div>
 				<div id="background"></div>
-				<p>"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever s"</p>
-
+				
 				<script nonce="${nonce}" src="${scriptUri}"></script>
 			</body>
 			</html>`;
 	}
 }
 
-function getNonce() {
+let  getNonce = () => {
 	let text = '';
 	const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 	for (let i = 0; i < 32; i++) {
 		text += possible.charAt(Math.floor(Math.random() * possible.length));
 	}
 	return text;
-}
+};
