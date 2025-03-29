@@ -1,8 +1,9 @@
 import {
     BACKGROUND_CANVAS_ID,
     PLAYER_CANVAS_ID,
-    BALL_SOURCE,
-    RIM_SOURCE
+    PLAYER_ID,
+    BALL_ID,
+    RIM_ID
 } from './magicVals';
 
 const backgroundCanvas = <HTMLCanvasElement>document.getElementById(BACKGROUND_CANVAS_ID);
@@ -11,6 +12,21 @@ const playerCanvas = <HTMLCanvasElement>document.getElementById(PLAYER_CANVAS_ID
 const backgroundCanvasContext = backgroundCanvas.getContext("2d");
 const playerCanvasContext = playerCanvas.getContext("2d");
 
+const playerImage = new Image();
+const ballImage = new Image();
+const rimImage = new Image();
+
+const playerElement = document.getElementById(PLAYER_ID);
+const ballElement = document.getElementById(BALL_ID);
+const rimElement = document.getElementById(RIM_ID);
+
+if (playerElement instanceof HTMLImageElement && ballElement instanceof HTMLImageElement && rimElement instanceof HTMLImageElement) {
+    playerImage.src = playerElement.src;
+    ballImage.src = ballElement.src;
+    rimImage.src = rimElement.src;
+} else {
+    console.error("Missing Image element");
+}
 
 const init = () => {
     window.requestAnimationFrame(draw);
@@ -18,25 +34,20 @@ const init = () => {
 
 const draw = () => {
     if (playerCanvasContext && backgroundCanvasContext) {
-        
-        // Set the rectangle color
+
+         // Clear canvas before drawing
+         playerCanvasContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
+         backgroundCanvasContext.clearRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
+         
+        // Set bg
         backgroundCanvasContext.fillStyle = "black";
-        playerCanvasContext.fillStyle = "red";
-
-        // Define rectangle dimensions
-        const rectWidth = 15;
-        const rectHeight = 30;
-        const x = (playerCanvas.width - rectWidth) / 2;
-        const y = playerCanvas.height - rectHeight;
-
-        // Draw the rectangle
         backgroundCanvasContext.fillRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
-        playerCanvasContext.fillRect(x, y, rectWidth, rectHeight);
 
-        // Loop the animation
+
+         //TODO: draw images in their native size
+ 
+
         window.requestAnimationFrame(draw);
-    }else{
-        console.error("Canvas not found");
     }
 };
 

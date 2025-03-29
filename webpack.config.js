@@ -46,7 +46,7 @@ const scriptsConfig = {
   entry: './src/scripts/main.ts', // Entry point for scripts
   output: {
     path: path.resolve(__dirname, 'media'),
-    filename: 'main.js', // Output in ../media/
+    filename: 'main.js',
   },
   resolve: {
     extensions: ['.ts', '.js'],

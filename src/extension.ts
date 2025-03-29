@@ -1,4 +1,14 @@
 import * as vscode from 'vscode';
+import {
+	BACKGROUND_CANVAS_ID,
+	PLAYER_CANVAS_ID,
+	PLAYER_SOURCE,
+	PLAYER_ID,
+	BALL_SOURCE,
+	BALL_ID,
+	RIM_SOURCE,
+	RIM_ID
+} from '../src/scripts/magicVals';
 
 // This method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
@@ -48,10 +58,13 @@ export class MyWebviewViewProvider implements vscode.WebviewViewProvider {
 	}
 	getWebviewContent(webview: vscode.Webview) {
 		const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'main.js'));
-
-		// Do the same for the stylesheet.
 		const stylesUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'styles.css'));
-		const ballUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'ball.svg'));
+		const playerImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', PLAYER_SOURCE));
+		const ballImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', BALL_SOURCE));
+		const rimImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', RIM_SOURCE));
+
+
+
 		const nonce = getNonce();
 
 		return `<!DOCTYPE html>
@@ -74,10 +87,13 @@ export class MyWebviewViewProvider implements vscode.WebviewViewProvider {
 			</head>
 			<body id="body">
 				<div id="canvasContainer">
-                    <canvas id="playerCanvas"></canvas>
-                    <canvas id="backgroundCanvas"></canvas>
+                    <canvas id="${PLAYER_CANVAS_ID}">
+						<img id="${PLAYER_ID}" src="${playerImageUri}" width="32px" height="32px" />
+						<img id="${BALL_ID}" src="${ballImageUri}" width="32px" height="32px"/>
+						<img id="${RIM_ID}" src="${rimImageUri}" width="32px" height="32px"/>
+					</canvas>
+                    <canvas id="${BACKGROUND_CANVAS_ID}"></canvas>
                 </div>
-				<div id="background"></div>
 				
 				<script nonce="${nonce}" src="${scriptUri}"></script>
 			</body>
@@ -85,7 +101,7 @@ export class MyWebviewViewProvider implements vscode.WebviewViewProvider {
 	}
 }
 
-let  getNonce = () => {
+let getNonce = () => {
 	let text = '';
 	const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 	for (let i = 0; i < 32; i++) {

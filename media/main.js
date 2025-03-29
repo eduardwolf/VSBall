@@ -7,11 +7,15 @@
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.RIM_SOURCE = exports.BALL_SOURCE = exports.PLAYER_CANVAS_ID = exports.BACKGROUND_CANVAS_ID = void 0;
+exports.RIM_ID = exports.RIM_SOURCE = exports.BALL_ID = exports.BALL_SOURCE = exports.PLAYER_ID = exports.PLAYER_SOURCE = exports.PLAYER_CANVAS_ID = exports.BACKGROUND_CANVAS_ID = void 0;
 exports.BACKGROUND_CANVAS_ID = 'backgroundCanvas';
 exports.PLAYER_CANVAS_ID = 'playerCanvas';
-exports.BALL_SOURCE = '';
-exports.RIM_SOURCE = '';
+exports.PLAYER_SOURCE = 'playerSprite.svg';
+exports.PLAYER_ID = 'playerSprite';
+exports.BALL_SOURCE = 'ballSprite.svg';
+exports.BALL_ID = 'ballSprite';
+exports.RIM_SOURCE = 'rimSprite.svg';
+exports.RIM_ID = 'rimSprite';
 
 
 /***/ })
@@ -53,27 +57,33 @@ const backgroundCanvas = document.getElementById(magicVals_1.BACKGROUND_CANVAS_I
 const playerCanvas = document.getElementById(magicVals_1.PLAYER_CANVAS_ID);
 const backgroundCanvasContext = backgroundCanvas.getContext("2d");
 const playerCanvasContext = playerCanvas.getContext("2d");
+const playerImage = new Image();
+const ballImage = new Image();
+const rimImage = new Image();
+const playerElement = document.getElementById(magicVals_1.PLAYER_ID);
+const ballElement = document.getElementById(magicVals_1.BALL_ID);
+const rimElement = document.getElementById(magicVals_1.RIM_ID);
+if (playerElement instanceof HTMLImageElement && ballElement instanceof HTMLImageElement && rimElement instanceof HTMLImageElement) {
+    playerImage.src = playerElement.src;
+    ballImage.src = ballElement.src;
+    rimImage.src = rimElement.src;
+}
+else {
+    console.error("Missing Image element");
+}
 const init = () => {
     window.requestAnimationFrame(draw);
 };
 const draw = () => {
     if (playerCanvasContext && backgroundCanvasContext) {
-        // Set the rectangle color
+        // Clear canvas before drawing
+        playerCanvasContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
+        backgroundCanvasContext.clearRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
+        // Set bg
         backgroundCanvasContext.fillStyle = "black";
-        playerCanvasContext.fillStyle = "red";
-        // Define rectangle dimensions
-        const rectWidth = 15;
-        const rectHeight = 30;
-        const x = (playerCanvas.width - rectWidth) / 2;
-        const y = playerCanvas.height - rectHeight;
-        // Draw the rectangle
         backgroundCanvasContext.fillRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
-        playerCanvasContext.fillRect(x, y, rectWidth, rectHeight);
-        // Loop the animation
+        //TODO: draw images in their native size
         window.requestAnimationFrame(draw);
-    }
-    else {
-        console.error("Canvas not found");
     }
 };
 init();
