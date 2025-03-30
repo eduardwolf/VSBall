@@ -88,9 +88,9 @@ export class MyWebviewViewProvider implements vscode.WebviewViewProvider {
 			<body id="body">
 				<div id="canvasContainer">
                     <canvas id="${PLAYER_CANVAS_ID}">
-						<img id="${PLAYER_ID}" src="${playerImageUri}" width="32px" height="32px" />
-						<img id="${BALL_ID}" src="${ballImageUri}" width="32px" height="32px"/>
-						<img id="${RIM_ID}" src="${rimImageUri}" width="32px" height="32px"/>
+						<img id="${PLAYER_ID}" src="${playerImageUri}" />
+						<img id="${BALL_ID}" src="${ballImageUri}"/>
+						<img id="${RIM_ID}" src="${rimImageUri}"/>
 					</canvas>
                     <canvas id="${BACKGROUND_CANVAS_ID}"></canvas>
                 </div>

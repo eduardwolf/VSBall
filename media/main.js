@@ -80,12 +80,22 @@ const draw = () => {
         playerCanvasContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
         backgroundCanvasContext.clearRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
         // Set bg
-        backgroundCanvasContext.fillStyle = "black";
+        backgroundCanvasContext.fillStyle = "beige";
         backgroundCanvasContext.fillRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
-        //TODO: draw images in their native size
+        playerCanvasContext.drawImage(playerImage, playerCanvas.width * 0, playerCanvas.height - playerImage.height, playerImage.naturalWidth, playerImage.naturalHeight);
+        playerCanvasContext.drawImage(ballImage, playerCanvas.width * 0.5, playerCanvas.height - ballImage.height, ballImage.naturalWidth, ballImage.naturalHeight);
+        playerCanvasContext.drawImage(rimImage, playerCanvas.width - rimImage.width, playerCanvas.height - rimImage.height, rimImage.naturalWidth, rimImage.naturalHeight);
         window.requestAnimationFrame(draw);
     }
 };
+const resizeCanvas = () => {
+    backgroundCanvas.width = window.innerWidth;
+    backgroundCanvas.height = window.innerHeight;
+    playerCanvas.width = window.innerWidth;
+    playerCanvas.height = window.innerHeight;
+};
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
 init();
 
 })();
