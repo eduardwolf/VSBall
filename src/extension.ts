@@ -10,16 +10,12 @@ import {
 	RIM_ID
 } from '../src/scripts/magicVals';
 
-// This method is called when your extension is activated
+// Called when extension activated, registers a new WebviewView provider, which is attached to the explorer using its id in package.json contributes object
 export function activate(context: vscode.ExtensionContext) {
 	console.log('"VSBALL is now active!');
 	vscode.window.showInformationMessage('VSBALL started');
 
-	// The command has been defined in the package.json file
-	// The commandId parameter must match the command field in package.json
 	const disposableCommand = vscode.commands.registerCommand('vsball.startBall', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
 		vscode.window.showInformationMessage('Ball started!!');
 		vscode.commands.executeCommand("vsballView.focus");
 	});
@@ -62,8 +58,6 @@ export class MyWebviewViewProvider implements vscode.WebviewViewProvider {
 		const playerImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', PLAYER_SOURCE));
 		const ballImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', BALL_SOURCE));
 		const rimImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', RIM_SOURCE));
-
-
 
 		const nonce = getNonce();
 

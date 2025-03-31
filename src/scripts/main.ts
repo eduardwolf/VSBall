@@ -6,25 +6,29 @@ import {
     RIM_ID
 } from './magicVals';
 
+// Get canvas elements and their contexts
 const backgroundCanvas = <HTMLCanvasElement>document.getElementById(BACKGROUND_CANVAS_ID);
 const playerCanvas = <HTMLCanvasElement>document.getElementById(PLAYER_CANVAS_ID);
-
 const backgroundCanvasContext = backgroundCanvas.getContext("2d");
 const playerCanvasContext = playerCanvas.getContext("2d");
 
+// Instantiate images that draw the svgs and get their elements
 const playerImage = new Image();
 const ballImage = new Image();
 const rimImage = new Image();
-
 const playerElement = document.getElementById(PLAYER_ID);
 const ballElement = document.getElementById(BALL_ID);
 const rimElement = document.getElementById(RIM_ID);
 
+let preventInit = false;
+
+// Set the image source to the element's
 if (playerElement instanceof HTMLImageElement && ballElement instanceof HTMLImageElement && rimElement instanceof HTMLImageElement) {
     playerImage.src = playerElement.src;
     ballImage.src = ballElement.src;
     rimImage.src = rimElement.src;
 } else {
+    preventInit = true;
     console.error("Missing Image element");
 }
 
@@ -43,7 +47,7 @@ const draw = () => {
         backgroundCanvasContext.fillStyle = "beige";
         backgroundCanvasContext.fillRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
 
-
+        // Draw Images
         playerCanvasContext.drawImage(playerImage, playerCanvas.width * 0, playerCanvas.height - playerImage.height, playerImage.naturalWidth, playerImage.naturalHeight);
         playerCanvasContext.drawImage(ballImage, playerCanvas.width * 0.5, playerCanvas.height - ballImage.height, ballImage.naturalWidth, ballImage.naturalHeight);
         playerCanvasContext.drawImage(rimImage, playerCanvas.width - rimImage.width, playerCanvas.height - rimImage.height, rimImage.naturalWidth, rimImage.naturalHeight);
@@ -62,4 +66,5 @@ const resizeCanvas = () => {
 };
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
-init();
+
+preventInit ? console.error("Failed to initialize VSBall") : init();
