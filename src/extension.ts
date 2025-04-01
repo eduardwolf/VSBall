@@ -7,7 +7,9 @@ import {
 	BALL_SOURCE,
 	BALL_ID,
 	RIM_SOURCE,
-	RIM_ID
+	RIM_ID,
+	BACKBOARD_SOURCE,
+	BACKBOARD_ID
 } from '../src/scripts/magicVals';
 
 // Called when extension activated, registers a new WebviewView provider, which is attached to the explorer using its id in package.json contributes object
@@ -58,6 +60,7 @@ export class MyWebviewViewProvider implements vscode.WebviewViewProvider {
 		const playerImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', PLAYER_SOURCE));
 		const ballImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', BALL_SOURCE));
 		const rimImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', RIM_SOURCE));
+		const backBoardImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', BACKBOARD_SOURCE));
 
 		const nonce = getNonce();
 
@@ -85,6 +88,8 @@ export class MyWebviewViewProvider implements vscode.WebviewViewProvider {
 						<img id="${PLAYER_ID}" src="${playerImageUri}" />
 						<img id="${BALL_ID}" src="${ballImageUri}"/>
 						<img id="${RIM_ID}" src="${rimImageUri}"/>
+						<img id="${BACKBOARD_ID}" src="${backBoardImageUri}"/>
+
 					</canvas>
                     <canvas id="${BACKGROUND_CANVAS_ID}"></canvas>
                 </div>

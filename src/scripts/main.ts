@@ -3,7 +3,8 @@ import {
     PLAYER_CANVAS_ID,
     PLAYER_ID,
     BALL_ID,
-    RIM_ID
+    RIM_ID,
+    BACKBOARD_ID
 } from './magicVals';
 
 // Get canvas elements and their contexts
@@ -16,17 +17,22 @@ const playerCanvasContext = playerCanvas.getContext("2d");
 const playerImage = new Image();
 const ballImage = new Image();
 const rimImage = new Image();
+const backBoardImage = new Image();
 const playerElement = document.getElementById(PLAYER_ID);
 const ballElement = document.getElementById(BALL_ID);
 const rimElement = document.getElementById(RIM_ID);
+const backBoardElement = document.getElementById(BACKBOARD_ID);
+
 
 let preventInit = false;
 
 // Set the image source to the element's
-if (playerElement instanceof HTMLImageElement && ballElement instanceof HTMLImageElement && rimElement instanceof HTMLImageElement) {
+if (playerElement instanceof HTMLImageElement && ballElement instanceof HTMLImageElement && rimElement instanceof HTMLImageElement && backBoardElement instanceof HTMLImageElement) {
     playerImage.src = playerElement.src;
     ballImage.src = ballElement.src;
     rimImage.src = rimElement.src;
+    backBoardImage.src = backBoardElement.src;
+
 } else {
     preventInit = true;
     console.error("Missing Image element");
@@ -47,7 +53,6 @@ let ballVelocityY = 0;
 let ballBounce = 0.7;
 let ballFriction = 0.99;
 let ballVelocityGroundLimit = 3;
-
 
 // Handle keyboard input
 const keys = {
@@ -77,7 +82,7 @@ const init = () => {
 
 const draw = () => {
     if (playerCanvasContext && backgroundCanvasContext) {
-        
+
 
         // Clear canvas before drawing
         playerCanvasContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
@@ -110,13 +115,21 @@ const draw = () => {
         ballVelocityX *= ballFriction;
 
         // Prevent ball from leaving the canvas
-        if (ballY + ballImage.naturalHeight / 2 > playerCanvas.height) {
-            ballY = playerCanvas.height - ballImage.naturalHeight / 2;
-            Math.abs(ballVelocityY) < ballVelocityGroundLimit ? ballVelocityY = 0 : ballVelocityY *= -ballBounce;
+        if (ballY + ballImage.naturalHeight > playerCanvas.height) {
+            ballY = playerCanvas.height - ballImage.naturalHeight;
+            Math.abs(ballVelocityY) < ballVelocityGroundLimit ? ballVelocityY = 0 : ballVelocityY *= -ballBounce; // Ground ball
         }
-        if (ballX < 0 || ballX + ballImage.naturalWidth / 2 > playerCanvas.width) {
+        if (ballX < 0 || ballX + ballImage.naturalWidth > playerCanvas.width) {
             ballVelocityX *= -1;
         }
+
+        // Get backboard position
+        const backBoardX = playerCanvas.width - backBoardImage.naturalWidth;
+        const backBoardY = playerCanvas.height - backBoardImage.naturalHeight;
+
+        // Compute rim position
+        const rimX = backBoardX - rimImage.naturalWidth / 2 + (backBoardImage.naturalWidth - rimImage.naturalWidth) / 2;
+        const rimY = backBoardY + (backBoardImage.naturalHeight * 1 / 5);
 
         // Draw Player
         playerCanvasContext.drawImage(playerImage, playerX, playerY, playerImage.naturalWidth, playerImage.naturalHeight);
@@ -126,17 +139,24 @@ const draw = () => {
             ballImage,
             ballX,
             ballY,
-            ballImage.naturalWidth / 2,
-            ballImage.naturalHeight / 2
+            ballImage.naturalWidth,
+            ballImage.naturalHeight
         );
-
+        // Draw Backboard
+        playerCanvasContext.drawImage(
+            backBoardImage,
+            backBoardX,
+            backBoardY,
+            backBoardImage.naturalWidth,
+            backBoardImage.naturalHeight
+        );
         // Draw rim
         playerCanvasContext.drawImage(
             rimImage,
-            playerCanvas.width - (rimImage.naturalWidth * 2),
-            playerCanvas.height - (rimImage.naturalHeight * 2),
-            rimImage.naturalWidth * 2,
-            rimImage.naturalHeight * 2
+            rimX,
+            rimY,
+            rimImage.naturalWidth,
+            rimImage.naturalHeight
         );
 
         window.requestAnimationFrame(draw);
