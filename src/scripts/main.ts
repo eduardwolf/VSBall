@@ -48,6 +48,8 @@ let playerVelocityY = 0;
 let playerIsJumping = false;
 let playerJumpForce = 5;
 let playerGravityMultiplier = 2;
+let playerLastAirDirection: "left" | "right" | null = null;
+let playerDisabledAirMovement = false;
 // Ball properties
 let ballX = playerCanvas.width * 0.5;
 let ballY = 0;
@@ -67,9 +69,37 @@ const keys = {
 };
 
 document.addEventListener("keydown", (event) => {
-    if (event.key === "a" || event.key === "A") { keys.left = true; }
-    if (event.key === "d" || event.key === "D") { keys.right = true; }
+    if (event.key === "a" || event.key === "A") {
+        if (!playerIsJumping) {
+            keys.left = true;
+        } else  if(!playerDisabledAirMovement){
+            if (playerLastAirDirection === null) {
+                playerLastAirDirection = "left";
+                keys.left = true;
+            } else if (playerLastAirDirection === "left") {
+                keys.left = true;
+            }
+        }
+    }
+    if (event.key === "d" || event.key === "D") {
+        if (!playerIsJumping) {
+            keys.right = true;
+        } else if(!playerDisabledAirMovement){
+            if (playerLastAirDirection === null) {
+                playerLastAirDirection = "right";
+                keys.right = true;
+
+            } else if (playerLastAirDirection === "right") {
+                keys.right = true;
+            }
+        }
+    }
     if (event.key === " " && !playerIsJumping) {
+        if (keys.right) {
+            playerLastAirDirection = "right";
+        } else if (keys.left) {
+            playerLastAirDirection = "left";
+        }
         keys.jump = true;
         playerIsJumping = true;
         playerVelocityY = - playerJumpForce; // Initial jump force ( when Y is zero, player is at the top of canvas, that's why it's negative )
@@ -77,8 +107,18 @@ document.addEventListener("keydown", (event) => {
 });
 
 document.addEventListener("keyup", (event) => {
-    if (event.key === "a" || event.key === "A") { keys.left = false; }
-    if (event.key === "d" || event.key === "D") { keys.right = false; }
+    if (event.key === "a" || event.key === "A") { 
+        keys.left = false; 
+        if (playerIsJumping && playerLastAirDirection === "left"){
+            playerDisabledAirMovement = true;
+        }
+    }
+    if (event.key === "d" || event.key === "D") { 
+        keys.right = false; 
+        if (playerIsJumping && playerLastAirDirection === "right"){
+            playerDisabledAirMovement = true;
+        }
+    }
 });
 
 const init = () => {
@@ -96,6 +136,7 @@ const draw = () => {
         backgroundCanvasContext.fillRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
 
         // Player movement
+
         if (keys.left) { playerX -= playerSpeed; }
         if (keys.right) { playerX += playerSpeed; }
 
@@ -105,12 +146,16 @@ const draw = () => {
 
         // Prevent player from leaving the canvas
         if (playerX < 0) { playerX = 0; }
-        if (playerX + playerImage.naturalWidth > playerCanvas.width) { 
-            playerX = playerCanvas.width - playerImage.naturalWidth; 
+        if (playerX + playerImage.naturalWidth > playerCanvas.width) {
+            playerX = playerCanvas.width - playerImage.naturalWidth;
         }
         if (playerY > playerCanvas.height - playerImage.height) {
             playerY = playerCanvas.height - playerImage.height;
             playerIsJumping = false;
+            playerLastAirDirection = null;
+            playerDisabledAirMovement = false;
+
+            
         }
 
         // Check collision between player and ball
