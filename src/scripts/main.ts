@@ -60,8 +60,9 @@ let playerGravityMultiplier = 2;
 let playerLastAirDirection: "left" | "right" | null = null;
 let playerDisabledAirMovement = false;
 let playerCanCatchBall = true;
-const playerMaxShotPower = 5; // Max power when releasing at peak
-const playerMinShotPower = 2; // Max power when releasing at peak
+const playerMaxShotPower = 7; // Max power when releasing at peak 
+// TODO: make scale with canvas width
+const playerMinShotPower = 1;
 let playerCanLandWithBall = false;
 
 
@@ -190,13 +191,12 @@ const draw = () => {
             
         }
 
-
         // Apply gravity to player
         if(playerIsJumping){
             playerY += playerVelocityY;
             playerVelocityY += gravity * playerGravityMultiplier;
         }
-        
+
         // Check collision between player and ball to catch it unless on cd
         if (
             playerCanCatchBall && !ballHeld &&
@@ -275,8 +275,18 @@ const draw = () => {
             ballY + ballImage.naturalHeight > backBoardY &&
             ballY < backBoardY + backBoardImage.naturalHeight
         ) {
-            ballVelocityX *= -ballBounce;
-            ballVelocityY *= -ballBounce;
+            // Check if the ball is hitting the **top** of the backboard
+            if (ballY + ballImage.naturalHeight - ballVelocityY <= backBoardY) {
+                // Ball landed on top, bounce vertically
+                ballVelocityY *= -ballBounce;
+                ballY = backBoardY - ballImage.naturalHeight; // Adjust position to avoid overlap
+            }
+            // Check if the ball is hitting the **sides** of the backboard
+            else if (ballX + ballImage.naturalWidth - ballVelocityX <= backBoardX || 
+                     ballX - ballVelocityX >= backBoardX + backBoardImage.naturalWidth) {
+                // Ball hit left or right, reverse X direction
+                ballVelocityX *= -1;
+            }
         }
 
         // Draw Pole
