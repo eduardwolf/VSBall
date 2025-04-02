@@ -46,6 +46,7 @@ let playerY = playerCanvas.height - playerImage.height;
 let playerSpeed = 3;
 let playerVelocityY = 0;
 let playerIsJumping = false;
+let playerCanJump = true;
 let playerJumpForce = 5;
 let playerGravityMultiplier = 2;
 let playerLastAirDirection: "left" | "right" | null = null;
@@ -94,7 +95,7 @@ document.addEventListener("keydown", (event) => {
             }
         }
     }
-    if (event.key === " " && !playerIsJumping) {
+    if (event.key === " " && !playerIsJumping && playerCanJump) {
         if (keys.right) {
             playerLastAirDirection = "right";
         } else if (keys.left) {
@@ -103,6 +104,7 @@ document.addEventListener("keydown", (event) => {
         keys.jump = true;
         playerIsJumping = true;
         playerVelocityY = - playerJumpForce; // Initial jump force ( when Y is zero, player is at the top of canvas, that's why it's negative )
+        playerCanJump = false;
     }
 });
 
@@ -118,6 +120,10 @@ document.addEventListener("keyup", (event) => {
         if (playerIsJumping && playerLastAirDirection === "right"){
             playerDisabledAirMovement = true;
         }
+    }
+    if (event.key === " ") { 
+        keys.jump = false;
+        playerCanJump = true;
     }
 });
 
