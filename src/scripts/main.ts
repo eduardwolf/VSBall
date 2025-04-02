@@ -38,14 +38,17 @@ if (playerElement instanceof HTMLImageElement && ballElement instanceof HTMLImag
     console.error("Missing Image element");
 }
 
+
+let gravity = 0.1;
 // Player properties
 let playerX = 100;
 let playerY = playerCanvas.height - playerImage.height;
-let playerSpeed = 5;
+let playerSpeed = 3;
 let playerVelocityY = 0;
-let gravity = 0.5;
-let isJumping = false;
-
+let playerIsJumping = false;
+let playerJumpForce = 5;
+let playerGravityMultiplier = 2;
+// Ball properties
 let ballX = playerCanvas.width * 0.5;
 let ballY = 0;
 let ballVelocityX = 2;
@@ -53,6 +56,8 @@ let ballVelocityY = 0;
 let ballBounce = 0.7;
 let ballFriction = 0.99;
 let ballVelocityGroundLimit = 3;
+let ballHeld = false;
+let ballGravityMultiplier = 1;
 
 // Handle keyboard input
 const keys = {
@@ -64,10 +69,10 @@ const keys = {
 document.addEventListener("keydown", (event) => {
     if (event.key === "a" || event.key === "A") { keys.left = true; }
     if (event.key === "d" || event.key === "D") { keys.right = true; }
-    if (event.key === " " && !isJumping) {
+    if (event.key === " " && !playerIsJumping) {
         keys.jump = true;
-        isJumping = true;
-        playerVelocityY = -10; // Initial jump force ( when Y is zero, player is at the top of canvas, that's why it's negative )
+        playerIsJumping = true;
+        playerVelocityY = - playerJumpForce; // Initial jump force ( when Y is zero, player is at the top of canvas, that's why it's negative )
     }
 });
 
@@ -82,13 +87,11 @@ const init = () => {
 
 const draw = () => {
     if (playerCanvasContext && backgroundCanvasContext) {
-
-
         // Clear canvas before drawing
         playerCanvasContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
         backgroundCanvasContext.clearRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
 
-        // Set bg
+        // Set background
         backgroundCanvasContext.fillStyle = "lightgreen";
         backgroundCanvasContext.fillRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
 
@@ -98,30 +101,56 @@ const draw = () => {
 
         // Apply gravity to player
         playerY += playerVelocityY;
-        playerVelocityY += gravity;
+        playerVelocityY += gravity * playerGravityMultiplier;
 
         // Prevent player from leaving the canvas
         if (playerX < 0) { playerX = 0; }
-        if (playerX + playerImage.naturalWidth > playerCanvas.width) { playerX = playerCanvas.width - playerImage.naturalWidth; }
+        if (playerX + playerImage.naturalWidth > playerCanvas.width) { 
+            playerX = playerCanvas.width - playerImage.naturalWidth; 
+        }
         if (playerY > playerCanvas.height - playerImage.height) {
             playerY = playerCanvas.height - playerImage.height;
-            isJumping = false;
+            playerIsJumping = false;
         }
 
-        // Ball movement
-        ballY += ballVelocityY;
-        ballX += ballVelocityX;
-        ballVelocityY += gravity;
-        ballVelocityX *= ballFriction;
+        // Check collision between player and ball
+        if (
+            ballX + ballImage.naturalWidth > playerX &&
+            ballX < playerX + playerImage.naturalWidth &&
+            ballY + ballImage.naturalHeight > playerY &&
+            ballY < playerY + playerImage.naturalHeight
+        ) {
+            ballHeld = true;
+        }
 
-        // Prevent ball from leaving the canvas
-        if (ballY + ballImage.naturalHeight > playerCanvas.height) {
-            ballY = playerCanvas.height - ballImage.naturalHeight;
-            Math.abs(ballVelocityY) < ballVelocityGroundLimit ? ballVelocityY = 0 : ballVelocityY *= -ballBounce; // Ground ball
+        if (ballHeld) {
+            // Hold ball in the top-right corner of the player
+            ballX = playerX + playerImage.naturalWidth - ballImage.naturalWidth / 2;
+            ballY = playerY - ballImage.naturalHeight / 2;
+            ballVelocityX = 0;
+            ballVelocityY = 0;
+        } else {
+            // Ball movement with gravity
+            ballY += ballVelocityY;
+            ballX += ballVelocityX;
+            ballVelocityY += gravity * ballGravityMultiplier;
+            ballVelocityX *= ballFriction;
+
+            // Ball boundary checks
+            if (ballY + ballImage.naturalHeight > playerCanvas.height) {
+                ballY = playerCanvas.height - ballImage.naturalHeight;
+                Math.abs(ballVelocityY) < ballVelocityGroundLimit ? ballVelocityY = 0 : ballVelocityY *= -ballBounce;
+            }
+            if (ballX < 0 || ballX + ballImage.naturalWidth > playerCanvas.width) {
+                ballVelocityX *= -1;
+            }
         }
-        if (ballX < 0 || ballX + ballImage.naturalWidth > playerCanvas.width) {
-            ballVelocityX *= -1;
-        }
+
+        // Draw Player
+        playerCanvasContext.drawImage(playerImage, playerX, playerY, playerImage.naturalWidth, playerImage.naturalHeight);
+
+        // Draw Ball
+        playerCanvasContext.drawImage(ballImage, ballX, ballY, ballImage.naturalWidth, ballImage.naturalHeight);
 
         // Get backboard position
         const backBoardX = playerCanvas.width - backBoardImage.naturalWidth;
@@ -131,33 +160,11 @@ const draw = () => {
         const rimX = backBoardX - rimImage.naturalWidth / 2 + (backBoardImage.naturalWidth - rimImage.naturalWidth) / 2;
         const rimY = backBoardY + (backBoardImage.naturalHeight * 1 / 5);
 
-        // Draw Player
-        playerCanvasContext.drawImage(playerImage, playerX, playerY, playerImage.naturalWidth, playerImage.naturalHeight);
-
-        // Draw Ball
-        playerCanvasContext.drawImage(
-            ballImage,
-            ballX,
-            ballY,
-            ballImage.naturalWidth,
-            ballImage.naturalHeight
-        );
         // Draw Backboard
-        playerCanvasContext.drawImage(
-            backBoardImage,
-            backBoardX,
-            backBoardY,
-            backBoardImage.naturalWidth,
-            backBoardImage.naturalHeight
-        );
-        // Draw rim
-        playerCanvasContext.drawImage(
-            rimImage,
-            rimX,
-            rimY,
-            rimImage.naturalWidth,
-            rimImage.naturalHeight
-        );
+        playerCanvasContext.drawImage(backBoardImage, backBoardX, backBoardY, backBoardImage.naturalWidth, backBoardImage.naturalHeight);
+
+        // Draw Rim
+        playerCanvasContext.drawImage(rimImage, rimX, rimY, rimImage.naturalWidth, rimImage.naturalHeight);
 
         window.requestAnimationFrame(draw);
     }
