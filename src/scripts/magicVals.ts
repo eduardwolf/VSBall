@@ -1,6 +1,6 @@
 // Sprites
 export const BACKGROUND_CANVAS_ID = 'backgroundCanvas';
-export const PLAYER_CANVAS_ID = 'playerCanvas';
+export const OBJECT_CANVAS_ID = 'playerCanvas';
 export const PLAYER_SOURCE = 'playerSprite.svg';
 export const PLAYER_ID = 'playerSprite';
 export const BALL_SOURCE = 'ballSprite.svg';
@@ -13,5 +13,3 @@ export const POLE_SOURCE = 'poleSprite.svg';
 export const POLE_ID = 'poleSprite';
 export const GROUND_SOURCE = 'groundsprite.svg';
 export const GROUND_ID = 'groundSprite';
-// Canvas setup
-export const RIM_DISTANCE_FROM_WALL = 5;
