@@ -20,6 +20,6 @@
  #playerCanvas{
     z-index: 2;
  }
- #backgroundCanvas{
+ #staticCanvas{
     z-index: 1;
  }

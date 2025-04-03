@@ -1,7 +1,6 @@
+import { GameObject } from "./GameObject"; // Import GameObject
 
-export class Player {
-  x: number;
-  y: number;
+export class Player extends GameObject {
   speed: number;
   velocityY: number;
   isJumping: boolean;
@@ -15,10 +14,10 @@ export class Player {
   minShotPower: number;
   canLandWithBall: boolean;
 
-  constructor() {
+  constructor(id: string, x: number = 0, y: number = 0) {
+    super(id, x, y);
 
-    this.x = 0;
-    this.y = 0;
+    // Player-specific properties
     this.speed = 3;
     this.velocityY = 0;
     this.isJumping = true;
@@ -32,4 +31,5 @@ export class Player {
     this.minShotPower = 1;
     this.canLandWithBall = false;
   }
+
 }

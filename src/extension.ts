@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import {
-	BACKGROUND_CANVAS_ID,
-	OBJECT_CANVAS_ID,
+	STATIC_CANVAS_ID,
+	DYNAMIC_CANVAS_ID,
 	PLAYER_SOURCE,
 	PLAYER_ID,
 	BALL_SOURCE,
@@ -90,18 +90,16 @@ export class MyWebviewViewProvider implements vscode.WebviewViewProvider {
 			</head>
 			<body id="body">
 				<div id="canvasContainer">
-                    <canvas id="${OBJECT_CANVAS_ID}">
+                    <canvas id="${DYNAMIC_CANVAS_ID}">
 						<img id="${PLAYER_ID}" src="${playerImageUri}" />
 						<img id="${BALL_ID}" src="${ballImageUri}"/>
+					</canvas>
+                    <canvas id="${STATIC_CANVAS_ID}">
 						<img id="${RIM_ID}" src="${rimImageUri}"/>
 						<img id="${BACKBOARD_ID}" src="${backBoardImageUri}"/>
 						<img id="${POLE_ID}" src="${poleImageUri}"/>
 						<img id="${GROUND_ID}" src="${groundImageUri}"/>
-
-
-
 					</canvas>
-                    <canvas id="${BACKGROUND_CANVAS_ID}"></canvas>
                 </div>
 				
 				<script nonce="${nonce}" src="${scriptUri}"></script>

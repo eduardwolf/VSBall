@@ -1,6 +1,6 @@
 // Sprites
-export const BACKGROUND_CANVAS_ID = 'backgroundCanvas';
-export const OBJECT_CANVAS_ID = 'playerCanvas';
+export const STATIC_CANVAS_ID = 'staticCanvas';
+export const DYNAMIC_CANVAS_ID = 'playerCanvas';
 export const PLAYER_SOURCE = 'playerSprite.svg';
 export const PLAYER_ID = 'playerSprite';
 export const BALL_SOURCE = 'ballSprite.svg';

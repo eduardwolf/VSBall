@@ -1,10 +1,15 @@
-import { Ball } from './Ball';
-import { GameSetup } from './GameSetup';
-import { Player } from './Player';
+import { GameSetup } from './classes/GameSetup';
+
+/*
+  - Initializes GameSetup class which includes all necessary properties, including game objects, canvas contexts, and other game info
+  - Draws static objects on initialization and window resize
+  - Draws dynamic objects each frame
+  - Listens for player movement events and calculates positions of the player and the ball accordingly
+*/
 
 const gameSetup = new GameSetup();
-const player = new Player();
-const ball = new Ball();
+const player = gameSetup.player;
+const ball = gameSetup.ball;
 
 // Handle keyboard input
 const keys = {
@@ -14,160 +19,152 @@ const keys = {
 };
 
 const resizeCanvas = () => {
-    gameSetup.backgroundCanvas.width = window.innerWidth;
-    gameSetup.backgroundCanvas.height = window.innerHeight;
-    gameSetup.objectCanvas.width = window.innerWidth;
-    gameSetup.objectCanvas.height = window.innerHeight;
+    gameSetup.staticCanvas.width = window.innerWidth;
+    gameSetup.staticCanvas.height = window.innerHeight;
+    gameSetup.dynamicCanvas.width = window.innerWidth;
+    gameSetup.dynamicCanvas.height = window.innerHeight;
 };
 
+// Draws static objects on initialization and window resize
 const drawStatic = () => {
+    gameSetup.staticCanvasContext.clearRect(0, 0, gameSetup.staticCanvas.width, gameSetup.staticCanvas.height);
+    gameSetup.staticCanvasContext.fillStyle = "skyblue";
+    gameSetup.staticCanvasContext.fillRect(0, 0, gameSetup.staticCanvas.width, gameSetup.staticCanvas.height);
 
-};
-
-const draw = () => {
-    if (gameSetup.objectCanvasContext && gameSetup.backgroundCanvasContext && gameSetup.pole instanceof HTMLImageElement) {
-        // Clear canvas before drawing
-        gameSetup.objectCanvasContext.clearRect(0, 0, gameSetup.objectCanvas.width, gameSetup.objectCanvas.height);
-        gameSetup.backgroundCanvasContext.clearRect(0, 0, gameSetup.backgroundCanvas.width, gameSetup.backgroundCanvas.height);
-
-        // Set background
-        gameSetup.backgroundCanvasContext.fillStyle = "skyblue";
-        gameSetup.backgroundCanvasContext.fillRect(0, 0, gameSetup.backgroundCanvas.width, gameSetup.backgroundCanvas.height);
-
-        // Player movement
-        if (keys.left || keys.right) {
-            if (keys.left) {
-                player.x -= player.speed;
-            }
-            if (keys.right) {
-                player.x += player.speed;
-            }
-
-        }
-
-        // Apply gameSetup.gravity to player
-        if (player.isJumping) {
-            player.y += player.velocityY;
-            player.velocityY += gameSetup.gravity * player.gravityMultiplier;
-        }
-
-        // Check collision between player and ball to catch it unless on cd
-        if (
-            player.canCatchBall && !ball.held &&
-            ball.x + gameSetup.ball.naturalWidth > player.x &&
-            ball.x < player.x + gameSetup.player.naturalWidth &&
-            ball.y + gameSetup.ball.naturalHeight > player.y &&
-            ball.y < player.y + gameSetup.player.naturalHeight
-        ) {
-            if (player.isJumping) {
-                player.canLandWithBall = true;
-            } else {
-                player.canLandWithBall = false;
-            }
-            ball.held = true;
-
-        }
-        // Prevent player from leaving the canvas
-        if (player.x < 0) { player.x = 0; }
-        if (player.x + gameSetup.player.naturalWidth > gameSetup.objectCanvas.width) {
-            player.x = gameSetup.objectCanvas.width - gameSetup.player.naturalWidth;
-        }
-        if (player.y > gameSetup.objectCanvas.height - gameSetup.player.height) {
-            player.y = gameSetup.objectCanvas.height - gameSetup.player.height;
-            player.isJumping = false;
-            player.lastAirDirection = null;
-            player.disabledAirMovement = false;
-            if (!player.canLandWithBall) { document.dispatchEvent(new KeyboardEvent("keyup", { key: " " })); }; // force shot on land, unless caught midair
-
-        }
-
-        if (ball.held) {
-            // Hold ball in the top-right corner of the player
-            ball.x = player.x + gameSetup.player.naturalWidth - gameSetup.ball.naturalWidth / 2;
-            ball.y = player.y - gameSetup.ball.naturalHeight / 2;
-            ball.velocityX = 0;
-            ball.velocityY = 0;
-        } else {
-            // Ball movement with gameSetup.gravity
-            ball.y += ball.velocityY;
-            ball.x += ball.velocityX;
-            ball.velocityY += gameSetup.gravity * ball.gravityMultiplier;
-            ball.velocityX *= ball.friction;
-
-            // Ball boundary checks
-            if (ball.y + gameSetup.ball.naturalHeight > gameSetup.objectCanvas.height - gameSetup.ground.naturalHeight) {
-                ball.y = gameSetup.objectCanvas.height - gameSetup.ball.naturalHeight - gameSetup.ground.naturalHeight;
-                Math.abs(ball.velocityY) < ball.velocityGroundLimit ? ball.velocityY = 0 : ball.velocityY *= -ball.bounce;
-            }
-            if (ball.x < 0 || ball.x + gameSetup.ball.naturalWidth > gameSetup.objectCanvas.width) {
-                ball.velocityX *= -1;
-            }
-        }
-
-        // Draw Player
-        gameSetup.objectCanvasContext.drawImage(gameSetup.player, player.x, player.y, gameSetup.player.naturalWidth, gameSetup.player.naturalHeight);
-
-        // Draw Ball
-        gameSetup.objectCanvasContext.drawImage(gameSetup.ball, ball.x, ball.y, gameSetup.ball.naturalWidth, gameSetup.ball.naturalHeight);
-
-        // Get pole position
-        const poleX = gameSetup.objectCanvas.width - gameSetup.pole.naturalWidth;
-        const poleY = gameSetup.objectCanvas.height - gameSetup.pole.naturalHeight - gameSetup.ground.naturalHeight;
-
-        // Get backboard position
-        const backBoardX = poleX - gameSetup.backBoard.naturalWidth;
-        const backBoardY = poleY; // Adjust if needed
-
-        // Compute rim position
-        const rimX = backBoardX - gameSetup.rim.naturalWidth;
-        const rimY = backBoardY + (gameSetup.backBoard.naturalHeight * 7 / 10);
-
-        const groundY = gameSetup.objectCanvas.height - gameSetup.ground.naturalHeight; // Floor at bottom
-        for (let groundX = 0; groundX < gameSetup.objectCanvas.width; groundX += gameSetup.ground.naturalWidth) {
-            gameSetup.objectCanvasContext.drawImage(gameSetup.ground, groundX, groundY, gameSetup.ground.naturalWidth, gameSetup.ground.naturalHeight);
-        }
-
-        if (
-            ball.x + gameSetup.ball.naturalWidth > backBoardX &&
-            ball.x < backBoardX + gameSetup.backBoard.naturalWidth &&
-            ball.y + gameSetup.ball.naturalHeight > backBoardY &&
-            ball.y < backBoardY + gameSetup.backBoard.naturalHeight
-        ) {
-            // Check if the ball is hitting the **top** of the backboard
-            if (ball.y + gameSetup.ball.naturalHeight - ball.velocityY <= backBoardY) {
-                // Ball landed on top, bounce vertically
-                ball.velocityY *= -ball.bounce;
-                ball.y = backBoardY - gameSetup.ball.naturalHeight; // Adjust position to avoid overlap
-            }
-            // Check if the ball is hitting the **sides** of the backboard
-            else if (ball.x + gameSetup.ball.naturalWidth - ball.velocityX <= backBoardX ||
-                ball.x - ball.velocityX >= backBoardX + gameSetup.backBoard.naturalWidth) {
-                // Ball hit left or right, reverse X direction
-                ball.velocityX *= -1;
-            }
-        }
-
-        // Draw Pole
-        gameSetup.objectCanvasContext.drawImage(gameSetup.pole, poleX, poleY, gameSetup.pole.naturalWidth, gameSetup.pole.naturalHeight);
-
-        // Draw Backboard on top of the pole
-        gameSetup.objectCanvasContext.drawImage(gameSetup.backBoard, backBoardX, backBoardY, gameSetup.backBoard.naturalWidth, gameSetup.backBoard.naturalHeight);
-        // Draw Rim
-        gameSetup.objectCanvasContext.drawImage(gameSetup.rim, rimX, rimY, gameSetup.rim.naturalWidth, gameSetup.rim.naturalHeight);
-
-        if (gameSetup.shotMessage) {
-            gameSetup.objectCanvasContext.font = "30px Arial";
-            gameSetup.objectCanvasContext.fillStyle = "gold";
-            gameSetup.objectCanvasContext.textAlign = "center";
-            gameSetup.objectCanvasContext.fillText(gameSetup.shotMessage, player.x + gameSetup.player.naturalWidth / 2, player.y - (gameSetup.player.naturalHeight / 10));
-        }
-
-        window.requestAnimationFrame(draw);
+    gameSetup.ground.y = gameSetup.staticCanvas.height - gameSetup.ground.image.naturalHeight;
+    for (let groundX = 0; groundX < gameSetup.staticCanvas.width; groundX += gameSetup.ground.image.naturalWidth) {
+        gameSetup.staticCanvasContext.drawImage(gameSetup.ground.image, groundX, gameSetup.ground.y, gameSetup.ground.image.naturalWidth, gameSetup.ground.image.naturalHeight);
     }
+
+    gameSetup.pole.x = gameSetup.staticCanvas.width - gameSetup.pole.image.naturalWidth;
+    gameSetup.pole.y = gameSetup.staticCanvas.height - gameSetup.pole.image.naturalHeight - gameSetup.ground.image.naturalHeight;
+    gameSetup.staticCanvasContext.drawImage(gameSetup.pole.image, gameSetup.pole.x, gameSetup.pole.y, gameSetup.pole.image.naturalWidth, gameSetup.pole.image.naturalHeight);
+
+    gameSetup.backBoard.x = gameSetup.pole.x - gameSetup.backBoard.image.naturalWidth;
+    gameSetup.backBoard.y = gameSetup.pole.y;
+    gameSetup.staticCanvasContext.drawImage(gameSetup.backBoard.image, gameSetup.backBoard.x, gameSetup.backBoard.y, gameSetup.backBoard.image.naturalWidth, gameSetup.backBoard.image.naturalHeight);
+
+    gameSetup.rim.x = gameSetup.backBoard.x - gameSetup.rim.image.naturalWidth;
+    gameSetup.rim.y = gameSetup.backBoard.y + (gameSetup.backBoard.image.naturalHeight * 7 / 10);
+    gameSetup.staticCanvasContext.drawImage(gameSetup.rim.image, gameSetup.rim.x, gameSetup.rim.y, gameSetup.rim.image.naturalWidth, gameSetup.rim.image.naturalHeight);
+
 };
 
+// Draws dynamic objects each frame
+const draw = () => {
+    gameSetup.dynamicCanvasContext.clearRect(0, 0, gameSetup.dynamicCanvas.width, gameSetup.dynamicCanvas.height);
 
-window.addEventListener("resize", resizeCanvas);
+    // Player movement
+    if (keys.left || keys.right) {
+        if (keys.left) {
+            player.x -= player.speed;
+        }
+        if (keys.right) {
+            player.x += player.speed;
+        }
+
+    }
+
+    // Apply gravity to player
+    if (player.isJumping) {
+        player.y += player.velocityY;
+        player.velocityY += gameSetup.gravity * player.gravityMultiplier;
+    }
+
+    // Check collision between player and ball to catch it unless on cd
+    if (
+        player.canCatchBall && !ball.held &&
+        ball.x + gameSetup.ball.image.naturalWidth > player.x &&
+        ball.x < player.x + gameSetup.player.image.naturalWidth &&
+        ball.y + gameSetup.ball.image.naturalHeight > player.y &&
+        ball.y < player.y + gameSetup.player.image.naturalHeight
+    ) {
+        if (player.isJumping) {
+            player.canLandWithBall = true;
+        } else {
+            player.canLandWithBall = false;
+        }
+        ball.held = true;
+
+    }
+
+    // Prevent player from leaving the canvas
+    if (player.x < 0) { player.x = 0; }
+    if (player.x + gameSetup.player.image.naturalWidth > gameSetup.dynamicCanvas.width) {
+        player.x = gameSetup.dynamicCanvas.width - gameSetup.player.image.naturalWidth;
+    }
+    if (player.y > gameSetup.dynamicCanvas.height - gameSetup.player.image.naturalHeight - gameSetup.ground.image.naturalHeight) {
+        player.y = gameSetup.dynamicCanvas.height - gameSetup.player.image.naturalHeight - gameSetup.ground.image.naturalHeight;
+        player.isJumping = false;
+        player.lastAirDirection = null;
+        player.disabledAirMovement = false;
+        if (!player.canLandWithBall) { document.dispatchEvent(new KeyboardEvent("keyup", { key: " " })); }; // force shot on land, unless caught midair
+    }
+
+    if (ball.held) {
+        // Hold ball in the top-right corner of the player
+        ball.x = player.x + gameSetup.player.image.naturalWidth - gameSetup.ball.image.naturalWidth / 2;
+        ball.y = player.y - gameSetup.ball.image.naturalHeight / 2;
+        ball.velocityX = 0;
+        ball.velocityY = 0;
+    } else {
+        // Ball movement with gameSetup.gravity
+        ball.y += ball.velocityY;
+        ball.x += ball.velocityX;
+        ball.velocityY += gameSetup.gravity * ball.gravityMultiplier;
+        ball.velocityX *= ball.friction;
+
+        // Ball boundary checks
+        if (ball.y + gameSetup.ball.image.naturalHeight > gameSetup.dynamicCanvas.height - gameSetup.ground.image.naturalHeight) {
+            ball.y = gameSetup.dynamicCanvas.height - gameSetup.ball.image.naturalHeight - gameSetup.ground.image.naturalHeight;
+            Math.abs(ball.velocityY) < ball.velocityGroundLimit ? ball.velocityY = 0 : ball.velocityY *= -ball.bounce;
+        }
+        if (ball.x < 0 || ball.x + gameSetup.ball.image.naturalWidth > gameSetup.dynamicCanvas.width) {
+            ball.velocityX *= -1;
+        }
+    }
+
+    // Ball vs backboard collision
+    if (
+        ball.x + gameSetup.ball.image.naturalWidth > gameSetup.backBoard.x &&
+        ball.x < gameSetup.backBoard.x + gameSetup.backBoard.image.naturalWidth &&
+        ball.y + gameSetup.ball.image.naturalHeight > gameSetup.backBoard.y &&
+        ball.y < gameSetup.backBoard.y + gameSetup.backBoard.image.naturalHeight
+    ) {
+        // Check if the ball is hitting the top of the backboard
+        if (ball.y + gameSetup.ball.image.naturalHeight - ball.velocityY <= gameSetup.backBoard.y) {
+            // Ball landed on top, bounce vertically
+            ball.velocityY *= -ball.bounce;
+            ball.y = gameSetup.backBoard.y - gameSetup.ball.image.naturalHeight; // Adjust position to avoid overlap
+        }
+        // Check if the ball is hitting the sides of the backboard
+        else if (ball.x + gameSetup.ball.image.naturalWidth - ball.velocityX <= gameSetup.backBoard.x ||
+            ball.x - ball.velocityX >= gameSetup.backBoard.x + gameSetup.backBoard.image.naturalWidth) {
+            // Ball hit left or right, reverse X direction
+            ball.velocityX *= -1;
+        }
+    }
+
+    // Perfect shot message
+    if (gameSetup.shotMessage) {
+        gameSetup.dynamicCanvasContext.font = "30px Arial";
+        gameSetup.dynamicCanvasContext.fillStyle = "gold";
+        gameSetup.dynamicCanvasContext.textAlign = "center";
+        gameSetup.dynamicCanvasContext.fillText(gameSetup.shotMessage, player.x + gameSetup.player.image.naturalWidth / 2, player.y - (gameSetup.player.image.naturalHeight / 10));
+    }
+
+   // Draw Player
+   gameSetup.dynamicCanvasContext.drawImage(gameSetup.player.image, player.x, player.y, gameSetup.player.image.naturalWidth, gameSetup.player.image.naturalHeight);
+   // Draw Ball
+   gameSetup.dynamicCanvasContext.drawImage(gameSetup.ball.image, ball.x, ball.y, gameSetup.ball.image.naturalWidth, gameSetup.ball.image.naturalHeight);
+
+    window.requestAnimationFrame(draw); // Loop per frame
+};
+
+window.addEventListener("resize", () => {
+    resizeCanvas();
+    drawStatic();
+});
 
 document.addEventListener("keydown", (event) => {
     if (event.key === "a" || event.key === "A") {
@@ -210,8 +207,6 @@ document.addEventListener("keydown", (event) => {
             player.canLandWithBall = false;
         }
     }
-
-
 });
 
 document.addEventListener("keyup", (event) => {
@@ -255,5 +250,3 @@ document.addEventListener("keyup", (event) => {
 resizeCanvas(); // Initial canvas resize
 drawStatic(); // Draw static objects
 window.requestAnimationFrame(draw); // Redraw per frame
-
-
