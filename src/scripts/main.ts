@@ -6,6 +6,9 @@ import { GameSetup } from './classes/GameSetup';
   - Draws dynamic objects each frame
   - Listens for player movement events and calculates positions of the player and the ball accordingly
 */
+let dribbleOffset = 0;
+let dribbleDirection = 1; // 1 for downward, -1 for upward
+const dribbleSpeed = 1; // Speed of dribbling movement
 
 const gameSetup = new GameSetup();
 const player = gameSetup.player;
@@ -102,11 +105,27 @@ const draw = () => {
     }
 
     if (ball.held) {
-        // Hold ball in the top-right corner of the player
+        if (!player.isJumping) {
+            dribbleOffset += dribbleDirection * dribbleSpeed;
+
+            // Reverse direction at max dribble height
+            if (Math.abs(dribbleOffset) >= player.image.naturalHeight / 3) {
+                dribbleDirection *= -1;
+            }
+
+            // Adjust ball position
+            ball.y = player.y + player.image.naturalHeight / 2 + dribbleOffset - ball.image.naturalHeight / 3;
+
+        } else {
+            dribbleOffset = 0;
+            // Hold ball in the top-right corner of the player
+            ball.y = player.y - gameSetup.ball.image.naturalHeight / 2;
+
+        }
         ball.x = player.x + gameSetup.player.image.naturalWidth - gameSetup.ball.image.naturalWidth / 2;
-        ball.y = player.y - gameSetup.ball.image.naturalHeight / 2;
         ball.velocityX = 0;
         ball.velocityY = 0;
+
     } else {
         // Ball movement with gameSetup.gravity
         ball.y += ball.velocityY;
@@ -118,6 +137,10 @@ const draw = () => {
         if (ball.y + gameSetup.ball.image.naturalHeight > gameSetup.dynamicCanvas.height - gameSetup.ground.image.naturalHeight) {
             ball.y = gameSetup.dynamicCanvas.height - gameSetup.ball.image.naturalHeight - gameSetup.ground.image.naturalHeight;
             Math.abs(ball.velocityY) < ball.velocityGroundLimit ? ball.velocityY = 0 : ball.velocityY *= -ball.bounce;
+            if (ball.isMidShot) {
+                ball.isMidShot = false;
+                gameSetup.score = 0;
+            }
         }
         if (ball.x < 0 || ball.x + gameSetup.ball.image.naturalWidth > gameSetup.dynamicCanvas.width) {
             ball.velocityX *= -1;
@@ -144,20 +167,46 @@ const draw = () => {
             ball.velocityX *= -1;
         }
     }
-
+    // Ball vs rim collission
+    if (
+        ball.x + gameSetup.ball.image.naturalWidth > gameSetup.rim.x &&
+        ball.x < gameSetup.rim.x + gameSetup.rim.image.naturalWidth &&
+        ball.y + gameSetup.ball.image.naturalHeight > gameSetup.rim.y &&
+        ball.y < gameSetup.rim.y + gameSetup.rim.image.naturalHeight
+    ) {
+        // Check if the ball is hitting the top of the rim
+        if (ball.y + gameSetup.ball.image.naturalHeight - ball.velocityY <= gameSetup.rim.y) {
+            //TODO: score
+            console.log("score");
+            if (ball.isMidShot) {
+                gameSetup.score += 1;
+                ball.isMidShot = false;
+            }
+        }
+        // Check if the ball is hitting the left side of the rim
+        else if (ball.x + gameSetup.ball.image.naturalWidth - ball.velocityX <= gameSetup.rim.x) {
+            ball.velocityX *= -1; // Reverse x direction
+        }
+    }
     // Perfect shot message
+    /*
     if (gameSetup.shotMessage) {
         gameSetup.dynamicCanvasContext.font = "30px Arial";
         gameSetup.dynamicCanvasContext.fillStyle = "gold";
         gameSetup.dynamicCanvasContext.textAlign = "center";
         gameSetup.dynamicCanvasContext.fillText(gameSetup.shotMessage, player.x + gameSetup.player.image.naturalWidth / 2, player.y - (gameSetup.player.image.naturalHeight / 10));
-    }
+    }*/
 
-   // Draw Player
-   gameSetup.dynamicCanvasContext.drawImage(gameSetup.player.image, player.x, player.y, gameSetup.player.image.naturalWidth, gameSetup.player.image.naturalHeight);
-   // Draw Ball
-   gameSetup.dynamicCanvasContext.drawImage(gameSetup.ball.image, ball.x, ball.y, gameSetup.ball.image.naturalWidth, gameSetup.ball.image.naturalHeight);
+    // Draw Player
+    gameSetup.dynamicCanvasContext.drawImage(gameSetup.player.image, player.x, player.y, gameSetup.player.image.naturalWidth, gameSetup.player.image.naturalHeight);
+    // Draw Ball
+    gameSetup.dynamicCanvasContext.drawImage(gameSetup.ball.image, ball.x, ball.y, gameSetup.ball.image.naturalWidth, gameSetup.ball.image.naturalHeight);
 
+    // Display score
+    gameSetup.dynamicCanvasContext.font = `${gameSetup.dynamicCanvas.width / 40 + gameSetup.dynamicCanvas.height / 40 + gameSetup.score * 1}px Arial`; // Scale font size dynamically
+    gameSetup.dynamicCanvasContext.fillStyle = "black";
+    gameSetup.dynamicCanvasContext.textAlign = "center";
+    gameSetup.dynamicCanvasContext.fillText(`Score: ${gameSetup.score}`, gameSetup.dynamicCanvas.width / 2, gameSetup.dynamicCanvas.height / 10);
     window.requestAnimationFrame(draw); // Loop per frame
 };
 
@@ -228,16 +277,18 @@ document.addEventListener("keyup", (event) => {
         if (ball.held) {
             const shotError = Math.abs(player.velocityY) / player.jumpForce > 1 ? 1 : Math.abs(player.velocityY) / player.jumpForce; // 1 is max error 
             const shotPower = Math.max(player.minShotPower, player.maxShotPower - (player.maxShotPower * shotError));
-            if (shotError < 0.05) {
+            /*if (shotError < 0.05) {
                 gameSetup.shotMessage = "PERFECT!";
                 setTimeout(() => {
                     gameSetup.shotMessage = ""; // Remove message after 1.5s
                 }, 1000);
-            }
+            }*/
+
             // Release ball at 45-degree angle towards the right
             ball.velocityX = shotPower;
             ball.velocityY = -shotPower;
             ball.held = false;
+            ball.isMidShot = true;
             player.canCatchBall = false; // to ensure it doesnt get stuck
             setTimeout(() => {
                 player.canCatchBall = true;

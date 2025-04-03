@@ -13,6 +13,7 @@ export class GameSetup {
 
   gravity: number;
   shotMessage: string;
+  score: number;
 
   staticCanvas: HTMLCanvasElement; // includes background, score
   dynamicCanvas: HTMLCanvasElement; // includes player, ball, rim system
@@ -28,9 +29,8 @@ export class GameSetup {
     this.player = new Player(PLAYER_ID, 0, 0);
     this.ball = new Ball(BALL_ID, 0, 0);
 
-    // Gravity setting
     this.gravity = 0.1;
-
+    this.score = 0;
     this.shotMessage = "";
 
     // Load canvases and their context

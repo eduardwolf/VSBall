@@ -8,6 +8,7 @@ export class Ball extends GameObject {
   velocityGroundLimit: number;
   held: boolean;
   gravityMultiplier: number;
+  isMidShot: boolean;
 
   constructor(id: string, x: number = 0, y: number = 0) {
     super(id, x, y); // Call the GameObject constructor
@@ -20,6 +21,7 @@ export class Ball extends GameObject {
     this.velocityGroundLimit = 3;
     this.held = false;
     this.gravityMultiplier = 1;
+    this.isMidShot = false;
   }
 
   // Add ball-specific methods here (e.g., movement, bouncing, etc.)
