@@ -11,7 +11,9 @@ import {
 	BACKBOARD_SOURCE,
 	BACKBOARD_ID,
 	POLE_SOURCE,
-	POLE_ID
+	POLE_ID,
+	GROUND_SOURCE,
+	GROUND_ID
 } from '../src/scripts/magicVals';
 
 // Called when extension activated, registers a new WebviewView provider, which is attached to the explorer using its id in package.json contributes object
@@ -64,6 +66,8 @@ export class MyWebviewViewProvider implements vscode.WebviewViewProvider {
 		const rimImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', RIM_SOURCE));
 		const backBoardImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', BACKBOARD_SOURCE));
 		const poleImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', POLE_SOURCE));
+		const groundImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', GROUND_SOURCE));
+
 		const nonce = getNonce();
 
 		return `<!DOCTYPE html>
@@ -92,6 +96,8 @@ export class MyWebviewViewProvider implements vscode.WebviewViewProvider {
 						<img id="${RIM_ID}" src="${rimImageUri}"/>
 						<img id="${BACKBOARD_ID}" src="${backBoardImageUri}"/>
 						<img id="${POLE_ID}" src="${poleImageUri}"/>
+						<img id="${GROUND_ID}" src="${groundImageUri}"/>
+
 
 
 					</canvas>

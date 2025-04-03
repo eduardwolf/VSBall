@@ -11,6 +11,7 @@ export const BACKBOARD_SOURCE = 'backBoardSprite.svg';
 export const BACKBOARD_ID = 'backBoardSprite';
 export const POLE_SOURCE = 'poleSprite.svg';
 export const POLE_ID = 'poleSprite';
-
+export const GROUND_SOURCE = 'groundsprite.svg';
+export const GROUND_ID = 'groundSprite';
 // Canvas setup
 export const RIM_DISTANCE_FROM_WALL = 5;

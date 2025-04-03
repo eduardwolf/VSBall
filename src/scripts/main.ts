@@ -7,6 +7,7 @@ import {
     BACKBOARD_ID,
     POLE_ID,
     RIM_DISTANCE_FROM_WALL,
+    GROUND_ID,
 } from './magicVals';
 
 // Get canvas elements and their contexts
@@ -14,54 +15,31 @@ const backgroundCanvas = <HTMLCanvasElement>document.getElementById(BACKGROUND_C
 const playerCanvas = <HTMLCanvasElement>document.getElementById(PLAYER_CANVAS_ID);
 const backgroundCanvasContext = backgroundCanvas.getContext("2d");
 const playerCanvasContext = playerCanvas.getContext("2d");
-
-// Instantiate images that draw the svgs and get their elements
-const playerImage = new Image();
-const ballImage = new Image();
-const rimImage = new Image();
-const backBoardImage = new Image();
-const poleImage = new Image();
-const playerElement = document.getElementById(PLAYER_ID);
-const ballElement = document.getElementById(BALL_ID);
-const rimElement = document.getElementById(RIM_ID);
-const backBoardElement = document.getElementById(BACKBOARD_ID);
-const poleElement = document.getElementById(POLE_ID);
-
+const playerElement = <HTMLImageElement>document.getElementById(PLAYER_ID);
+const ballElement = <HTMLImageElement>document.getElementById(BALL_ID);
+const rimElement = <HTMLImageElement>document.getElementById(RIM_ID);
+const backBoardElement = <HTMLImageElement>document.getElementById(BACKBOARD_ID);
+const poleElement = <HTMLImageElement>document.getElementById(POLE_ID);
+const groundElement = <HTMLImageElement>document.getElementById(GROUND_ID);
 
 let preventInit = false;
 
-// Set the image source to the element's
-if (playerElement instanceof HTMLImageElement && ballElement instanceof HTMLImageElement
-    && rimElement instanceof HTMLImageElement && backBoardElement instanceof HTMLImageElement
-    && poleElement instanceof HTMLImageElement) {
-    playerImage.src = playerElement.src;
-    ballImage.src = ballElement.src;
-    rimImage.src = rimElement.src;
-    backBoardImage.src = backBoardElement.src;
-    poleImage.src = poleElement.src;
-
-} else {
-    preventInit = true;
-    console.error("Missing Image element");
-}
-
-
+// TODO: change to classes
 let gravity = 0.1;
 let shotMessage = "";
 // Player properties
 let playerX = 100;
-let playerY = playerCanvas.height - playerImage.height;
+let playerY = playerCanvas.height - playerElement.height;
 let playerSpeed = 3;
 let playerVelocityY = 0;
 let playerIsJumping = true;
 let playerCanJump = true;
 let playerJumpForce = 5;
-let playerGravityMultiplier = 2;
+let playerGravityMultiplier = 1.5;
 let playerLastAirDirection: "left" | "right" | null = null;
 let playerDisabledAirMovement = false;
 let playerCanCatchBall = true;
 const playerMaxShotPower = 7; // Max power when releasing at peak 
-// TODO: make scale with canvas width
 const playerMinShotPower = 1;
 let playerCanLandWithBall = false;
 
@@ -168,16 +146,17 @@ document.addEventListener("keyup", (event) => {
 
 const init = () => {
     window.requestAnimationFrame(draw);
+    // TODO: draw static stuff so it doesn't get redrawn every frame
 };
 
 const draw = () => {
-    if (playerCanvasContext && backgroundCanvasContext) {
+    if (playerCanvasContext && backgroundCanvasContext && poleElement instanceof HTMLImageElement) {
         // Clear canvas before drawing
         playerCanvasContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
         backgroundCanvasContext.clearRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
 
         // Set background
-        backgroundCanvasContext.fillStyle = "lightgreen";
+        backgroundCanvasContext.fillStyle = "skyblue";
         backgroundCanvasContext.fillRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
 
         // Player movement
@@ -200,10 +179,10 @@ const draw = () => {
         // Check collision between player and ball to catch it unless on cd
         if (
             playerCanCatchBall && !ballHeld &&
-            ballX + ballImage.naturalWidth > playerX &&
-            ballX < playerX + playerImage.naturalWidth &&
-            ballY + ballImage.naturalHeight > playerY &&
-            ballY < playerY + playerImage.naturalHeight
+            ballX + ballElement.naturalWidth > playerX &&
+            ballX < playerX + playerElement.naturalWidth &&
+            ballY + ballElement.naturalHeight > playerY &&
+            ballY < playerY + playerElement.naturalHeight
         ) {
             if (playerIsJumping){
                 playerCanLandWithBall = true;
@@ -215,11 +194,11 @@ const draw = () => {
         }
         // Prevent player from leaving the canvas
         if (playerX < 0) { playerX = 0; }
-        if (playerX + playerImage.naturalWidth > playerCanvas.width) {
-            playerX = playerCanvas.width - playerImage.naturalWidth;
+        if (playerX + playerElement.naturalWidth > playerCanvas.width) {
+            playerX = playerCanvas.width - playerElement.naturalWidth;
         }
-        if (playerY > playerCanvas.height - playerImage.height) {
-            playerY = playerCanvas.height - playerImage.height;
+        if (playerY > playerCanvas.height - playerElement.height) {
+            playerY = playerCanvas.height - playerElement.height;
             playerIsJumping = false;
             playerLastAirDirection = null;
             playerDisabledAirMovement = false;
@@ -229,8 +208,8 @@ const draw = () => {
 
         if (ballHeld) {
             // Hold ball in the top-right corner of the player
-            ballX = playerX + playerImage.naturalWidth - ballImage.naturalWidth / 2;
-            ballY = playerY - ballImage.naturalHeight / 2;
+            ballX = playerX + playerElement.naturalWidth - ballElement.naturalWidth / 2;
+            ballY = playerY - ballElement.naturalHeight / 2;
             ballVelocityX = 0;
             ballVelocityY = 0;
         } else {
@@ -241,67 +220,72 @@ const draw = () => {
             ballVelocityX *= ballFriction;
 
             // Ball boundary checks
-            if (ballY + ballImage.naturalHeight > playerCanvas.height) {
-                ballY = playerCanvas.height - ballImage.naturalHeight;
+            if (ballY + ballElement.naturalHeight > playerCanvas.height - groundElement.naturalHeight) {
+                ballY = playerCanvas.height - ballElement.naturalHeight - groundElement.naturalHeight;
                 Math.abs(ballVelocityY) < ballVelocityGroundLimit ? ballVelocityY = 0 : ballVelocityY *= -ballBounce;
             }
-            if (ballX < 0 || ballX + ballImage.naturalWidth > playerCanvas.width) {
+            if (ballX < 0 || ballX + ballElement.naturalWidth > playerCanvas.width) {
                 ballVelocityX *= -1;
             }
         }
 
         // Draw Player
-        playerCanvasContext.drawImage(playerImage, playerX, playerY, playerImage.naturalWidth, playerImage.naturalHeight);
+        playerCanvasContext.drawImage(playerElement, playerX, playerY, playerElement.naturalWidth, playerElement.naturalHeight);
 
         // Draw Ball
-        playerCanvasContext.drawImage(ballImage, ballX, ballY, ballImage.naturalWidth, ballImage.naturalHeight);
+        playerCanvasContext.drawImage(ballElement, ballX, ballY, ballElement.naturalWidth, ballElement.naturalHeight);
 
         // Get pole position
-        const poleX = playerCanvas.width - poleImage.naturalWidth - RIM_DISTANCE_FROM_WALL;
-        const poleY = playerCanvas.height - poleImage.naturalHeight;
+        const poleX = playerCanvas.width - poleElement.naturalWidth - RIM_DISTANCE_FROM_WALL;
+        const poleY = playerCanvas.height - poleElement.naturalHeight - groundElement.naturalHeight;
 
         // Get backboard position
-        const backBoardX = poleX + (poleImage.naturalWidth - backBoardImage.naturalWidth) / 2;
-        const backBoardY = poleY - backBoardImage.naturalHeight; // Adjust if needed
+        const backBoardX = poleX  - backBoardElement.naturalWidth;
+        const backBoardY = poleY; // Adjust if needed
 
         // Compute rim position
-        const rimX = backBoardX - rimImage.naturalWidth / 2 + (backBoardImage.naturalWidth - rimImage.naturalWidth) / 2;
-        const rimY = backBoardY + (backBoardImage.naturalHeight * 5 / 10);
+        const rimX = backBoardX - rimElement.naturalWidth;
+        const rimY = backBoardY + (backBoardElement.naturalHeight * 7 / 10);
+
+        const groundY = playerCanvas.height - groundElement.naturalHeight; // Floor at bottom
+        for (let groundX = 0; groundX < playerCanvas.width; groundX += groundElement.naturalWidth) {
+            playerCanvasContext.drawImage(groundElement, groundX, groundY, groundElement.naturalWidth, groundElement.naturalHeight);
+        }
 
         // TODO: test this block
         if (
-            ballX + ballImage.naturalWidth > backBoardX &&
-            ballX < backBoardX + backBoardImage.naturalWidth &&
-            ballY + ballImage.naturalHeight > backBoardY &&
-            ballY < backBoardY + backBoardImage.naturalHeight
+            ballX + ballElement.naturalWidth > backBoardX &&
+            ballX < backBoardX + backBoardElement.naturalWidth &&
+            ballY + ballElement.naturalHeight > backBoardY &&
+            ballY < backBoardY + backBoardElement.naturalHeight
         ) {
             // Check if the ball is hitting the **top** of the backboard
-            if (ballY + ballImage.naturalHeight - ballVelocityY <= backBoardY) {
+            if (ballY + ballElement.naturalHeight - ballVelocityY <= backBoardY) {
                 // Ball landed on top, bounce vertically
                 ballVelocityY *= -ballBounce;
-                ballY = backBoardY - ballImage.naturalHeight; // Adjust position to avoid overlap
+                ballY = backBoardY - ballElement.naturalHeight; // Adjust position to avoid overlap
             }
             // Check if the ball is hitting the **sides** of the backboard
-            else if (ballX + ballImage.naturalWidth - ballVelocityX <= backBoardX || 
-                     ballX - ballVelocityX >= backBoardX + backBoardImage.naturalWidth) {
+            else if (ballX + ballElement.naturalWidth - ballVelocityX <= backBoardX || 
+                     ballX - ballVelocityX >= backBoardX + backBoardElement.naturalWidth) {
                 // Ball hit left or right, reverse X direction
                 ballVelocityX *= -1;
             }
         }
 
         // Draw Pole
-        playerCanvasContext.drawImage(poleImage, poleX, poleY, poleImage.naturalWidth, poleImage.naturalHeight);
+        playerCanvasContext.drawImage(poleElement, poleX, poleY, poleElement.naturalWidth, poleElement.naturalHeight);
 
         // Draw Backboard on top of the pole
-        playerCanvasContext.drawImage(backBoardImage, backBoardX, backBoardY, backBoardImage.naturalWidth, backBoardImage.naturalHeight);
+        playerCanvasContext.drawImage(backBoardElement, backBoardX, backBoardY, backBoardElement.naturalWidth, backBoardElement.naturalHeight);
         // Draw Rim
-        playerCanvasContext.drawImage(rimImage, rimX, rimY, rimImage.naturalWidth, rimImage.naturalHeight);
+        playerCanvasContext.drawImage(rimElement, rimX, rimY, rimElement.naturalWidth, rimElement.naturalHeight);
 
         if (shotMessage) {
             playerCanvasContext.font = "30px Arial";
             playerCanvasContext.fillStyle = "gold";
             playerCanvasContext.textAlign = "center";
-            playerCanvasContext.fillText(shotMessage, playerX + playerImage.naturalWidth / 2, playerY - (playerImage.naturalHeight / 10));
+            playerCanvasContext.fillText(shotMessage, playerX + playerElement.naturalWidth / 2, playerY - (playerElement.naturalHeight / 10));
         }
 
         window.requestAnimationFrame(draw);
