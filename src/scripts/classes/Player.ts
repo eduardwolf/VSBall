@@ -16,9 +16,11 @@ export class Player extends GameObject {
   shootingImage: HTMLImageElement;
   runningImage1: HTMLImageElement;
   runningImage2: HTMLImageElement;
+  idleImage1: HTMLImageElement;
+  idleImage2: HTMLImageElement;
 
 
-  constructor(id: string, shootingId: string, running1Id: string, running2Id: string, x: number = 0, y: number = 0) {
+  constructor(id: string, shootingId: string, running1Id: string, running2Id: string, idle1Id: string, idle2Id: string, x: number = 0, y: number = 0) {
     super(id, x, y);
 
     // Player-specific properties
@@ -37,6 +39,8 @@ export class Player extends GameObject {
     this.shootingImage = this.getImageElement(shootingId);
     this.runningImage1 = this.getImageElement(running1Id);
     this.runningImage2 = this.getImageElement(running2Id);
+    this.idleImage1 = this.getImageElement(idle1Id);
+    this.idleImage2 = this.getImageElement(idle2Id);
 
   }
 

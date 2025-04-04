@@ -6,15 +6,6 @@ import { GameSetup } from './classes/GameSetup';
   - Draws dynamic objects each frame
   - Listens for player movement events and calculates positions of the player and the ball accordingly
 */
-let dribbleOffset = 0;
-let dribbleDirection = 1; // 1 for downward, -1 for upward
-const dribbleSpeed = 1; // Speed of dribbling movement
-let runningFrame = 0;
-let lastRunningFrameTime = performance.now();
-const runningFrameInterval = 250; // ms between frames
-
-
-
 const gameSetup = new GameSetup();
 const player = gameSetup.player;
 const ball = gameSetup.ball;
@@ -111,18 +102,18 @@ const draw = () => {
 
     if (ball.held) {
         if (!player.isJumping) {
-            dribbleOffset += dribbleDirection * dribbleSpeed;
+            gameSetup.dribbleOffset += gameSetup.dribbleDirection * gameSetup.dribbleSpeed;
 
             // Reverse direction at max dribble height
-            if (Math.abs(dribbleOffset) >= player.image.naturalHeight / 3) {
-                dribbleDirection *= -1;
+            if (Math.abs(gameSetup.dribbleOffset) >= player.image.naturalHeight / 3) {
+                gameSetup.dribbleDirection *= -1;
             }
 
             // Adjust ball position
-            ball.y = player.y + player.image.naturalHeight / 2 + dribbleOffset - ball.image.naturalHeight / 3;
+            ball.y = player.y + player.image.naturalHeight / 2 + gameSetup.dribbleOffset - ball.image.naturalHeight / 3;
 
         } else {
-            dribbleOffset = 0;
+            gameSetup.dribbleOffset = 0;
             // Hold ball in the top-right corner of the player
             ball.y = player.y - gameSetup.ball.image.naturalHeight / 2;
 
@@ -203,17 +194,26 @@ const draw = () => {
 
     // Draw Player
     let playerImg;
+    let currentTime = performance.now();
     if ((keys.left || keys.right) && !player.isJumping) {
-        const currentTime = performance.now();
-        if (currentTime - lastRunningFrameTime >= runningFrameInterval) {
-            runningFrame = (runningFrame + 1) % 2;
-            lastRunningFrameTime = currentTime;
+        // Running animation
+        if (currentTime - gameSetup.lastRunningFrameTime >= gameSetup.runningFrameInterval) {
+            gameSetup.runningFrame = (gameSetup.runningFrame + 1) % 2;
+            gameSetup.lastRunningFrameTime = currentTime;
         }
-        playerImg = runningFrame === 0 ? player.runningImage1 : player.runningImage2;
+        playerImg = gameSetup.runningFrame === 0 ? player.runningImage1 : player.runningImage2;
+    } else if (!player.isJumping) {
+        // Idle animation
+        if (currentTime - gameSetup.lastRunningFrameTime >= gameSetup.runningFrameInterval) {
+            gameSetup.runningFrame = (gameSetup.runningFrame + 1) % 2;
+            gameSetup.lastRunningFrameTime = currentTime;
+        }
+        playerImg = gameSetup.runningFrame === 0 ? player.idleImage1 : player.idleImage2;
     } else {
-        runningFrame = 0;
-        lastRunningFrameTime = performance.now();
-        playerImg = player.isJumping ? gameSetup.player.shootingImage : player.image;
+        // Jumping image
+        gameSetup.runningFrame = 0;
+        gameSetup.lastRunningFrameTime = performance.now();
+        playerImg = player.shootingImage;
     }
     gameSetup.dynamicCanvasContext.drawImage(playerImg, player.x, player.y, playerImg.naturalWidth, playerImg.naturalHeight);
     // Draw Ball

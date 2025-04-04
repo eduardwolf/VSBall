@@ -1,6 +1,6 @@
 import { Ball } from "./Ball";
 import { GameObject } from "./GameObject";
-import { BACKBOARD_ID, BALL_ID, GROUND_ID, PLAYER_ID, POLE_ID, RIM_ID, STATIC_CANVAS_ID, DYNAMIC_CANVAS_ID, PLAYER_SHOOTING_ID, PLAYER_RUNNING1_ID, PLAYER_RUNNING2_ID } from "../magicVals";
+import { BACKBOARD_ID, BALL_ID, GROUND_ID, PLAYER_ID, POLE_ID, RIM_ID, STATIC_CANVAS_ID, DYNAMIC_CANVAS_ID, PLAYER_SHOOTING_ID, PLAYER_RUNNING1_ID, PLAYER_RUNNING2_ID, PLAYER_IDLE1_ID, PLAYER_IDLE2_ID } from "../magicVals";
 import { Player } from "./Player";
 
 export class GameSetup {
@@ -15,10 +15,18 @@ export class GameSetup {
   shotMessage: string;
   score: number;
 
-  staticCanvas: HTMLCanvasElement; // includes background, score
-  dynamicCanvas: HTMLCanvasElement; // includes player, ball, rim system
+  staticCanvas: HTMLCanvasElement;
+  dynamicCanvas: HTMLCanvasElement;
   staticCanvasContext: CanvasRenderingContext2D;
   dynamicCanvasContext: CanvasRenderingContext2D;
+
+  dribbleOffset: number;
+  dribbleDirection: number;
+  dribbleSpeed: number;
+
+  runningFrame: number;
+  lastRunningFrameTime: number;
+  runningFrameInterval: number;
 
   constructor() {
     // Load images from HTML
@@ -26,7 +34,7 @@ export class GameSetup {
     this.backBoard = new GameObject(BACKBOARD_ID, 0, 0);
     this.pole = new GameObject(POLE_ID, 0, 0);
     this.ground = new GameObject(GROUND_ID, 0, 0);
-    this.player = new Player(PLAYER_ID, PLAYER_SHOOTING_ID, PLAYER_RUNNING1_ID, PLAYER_RUNNING2_ID,0, 0);
+    this.player = new Player(PLAYER_ID, PLAYER_SHOOTING_ID, PLAYER_RUNNING1_ID, PLAYER_RUNNING2_ID, PLAYER_IDLE1_ID, PLAYER_IDLE2_ID,0, 0);
     this.ball = new Ball(BALL_ID, 0, 0);
 
     this.gravity = 0.1;
@@ -38,9 +46,14 @@ export class GameSetup {
     this.dynamicCanvas = this.getCanvasElement(DYNAMIC_CANVAS_ID);
     this.staticCanvasContext = this.getCanvasContext(this.staticCanvas);
     this.dynamicCanvasContext = this.getCanvasContext(this.dynamicCanvas);
+
+    this.dribbleOffset = 0;
+    this.dribbleDirection = 1;
+    this.dribbleSpeed = 1;
+    this.runningFrame = 0;
+    this.lastRunningFrameTime = performance.now();
+    this.runningFrameInterval = 250;
   }
-
-
 
   private getCanvasElement(id: string): HTMLCanvasElement {
     const element = document.getElementById(id);

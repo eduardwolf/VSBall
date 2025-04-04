@@ -19,7 +19,11 @@ import {
 	PLAYER_RUNNING1_ID,
 	PLAYER_RUNNING1_SOURCE,
 	PLAYER_RUNNING2_ID,
-	PLAYER_RUNNING2_SOURCE
+	PLAYER_RUNNING2_SOURCE,
+	PLAYER_IDLE1_ID,
+	PLAYER_IDLE1_SOURCE,
+	PLAYER_IDLE2_ID,
+	PLAYER_IDLE2_SOURCE
 } from '../src/scripts/magicVals';
 
 // Called when extension activated, registers a new WebviewView provider, which is attached to the explorer using its id in package.json contributes object
@@ -71,6 +75,9 @@ export class MyWebviewViewProvider implements vscode.WebviewViewProvider {
 		const playerShootingImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', PLAYER_SHOOTING_SOURCE));
 		const playerRunning1ImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', PLAYER_RUNNING1_SOURCE));
 		const playerRunning2ImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', PLAYER_RUNNING2_SOURCE));
+		const playerIdle1ImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', PLAYER_IDLE1_SOURCE));
+		const playerIdle2ImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', PLAYER_IDLE2_SOURCE));
+
 
 
 		const ballImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', BALL_SOURCE));
@@ -111,6 +118,9 @@ export class MyWebviewViewProvider implements vscode.WebviewViewProvider {
 						<img id="${PLAYER_SHOOTING_ID}" src="${playerShootingImageUri}" />
 						<img id="${PLAYER_RUNNING1_ID}" src="${playerRunning1ImageUri}" />
 						<img id="${PLAYER_RUNNING2_ID}" src="${playerRunning2ImageUri}" />
+						<img id="${PLAYER_IDLE1_ID}" src="${playerIdle1ImageUri}" />
+						<img id="${PLAYER_IDLE2_ID}" src="${playerIdle2ImageUri}" />
+
 						<img id="${BALL_ID}" src="${ballImageUri}"/>
 						<img id="${RIM_ID}" src="${rimImageUri}"/>
 						<img id="${BACKBOARD_ID}" src="${backBoardImageUri}"/>
