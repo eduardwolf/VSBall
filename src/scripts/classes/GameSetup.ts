@@ -1,6 +1,6 @@
 import { Ball } from "./Ball";
 import { GameObject } from "./GameObject";
-import { BACKBOARD_ID, BALL_ID, GROUND_ID, PLAYER_ID, POLE_ID, RIM_ID, STATIC_CANVAS_ID, DYNAMIC_CANVAS_ID } from "../magicVals";
+import { BACKBOARD_ID, BALL_ID, GROUND_ID, PLAYER_ID, POLE_ID, RIM_ID, STATIC_CANVAS_ID, DYNAMIC_CANVAS_ID, PLAYER_SHOOTING_ID, PLAYER_RUNNING1_ID, PLAYER_RUNNING2_ID } from "../magicVals";
 import { Player } from "./Player";
 
 export class GameSetup {
@@ -26,7 +26,7 @@ export class GameSetup {
     this.backBoard = new GameObject(BACKBOARD_ID, 0, 0);
     this.pole = new GameObject(POLE_ID, 0, 0);
     this.ground = new GameObject(GROUND_ID, 0, 0);
-    this.player = new Player(PLAYER_ID, 0, 0);
+    this.player = new Player(PLAYER_ID, PLAYER_SHOOTING_ID, PLAYER_RUNNING1_ID, PLAYER_RUNNING2_ID,0, 0);
     this.ball = new Ball(BALL_ID, 0, 0);
 
     this.gravity = 0.1;

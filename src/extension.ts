@@ -13,7 +13,13 @@ import {
 	POLE_SOURCE,
 	POLE_ID,
 	GROUND_SOURCE,
-	GROUND_ID
+	GROUND_ID,
+	PLAYER_SHOOTING_SOURCE,
+	PLAYER_SHOOTING_ID,
+	PLAYER_RUNNING1_ID,
+	PLAYER_RUNNING1_SOURCE,
+	PLAYER_RUNNING2_ID,
+	PLAYER_RUNNING2_SOURCE
 } from '../src/scripts/magicVals';
 
 // Called when extension activated, registers a new WebviewView provider, which is attached to the explorer using its id in package.json contributes object
@@ -62,6 +68,11 @@ export class MyWebviewViewProvider implements vscode.WebviewViewProvider {
 		const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'main.js'));
 		const stylesUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'styles.css'));
 		const playerImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', PLAYER_SOURCE));
+		const playerShootingImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', PLAYER_SHOOTING_SOURCE));
+		const playerRunning1ImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', PLAYER_RUNNING1_SOURCE));
+		const playerRunning2ImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', PLAYER_RUNNING2_SOURCE));
+
+
 		const ballImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', BALL_SOURCE));
 		const rimImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', RIM_SOURCE));
 		const backBoardImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', BACKBOARD_SOURCE));
@@ -91,15 +102,20 @@ export class MyWebviewViewProvider implements vscode.WebviewViewProvider {
 			<body id="body">
 				<div id="canvasContainer">
                     <canvas id="${DYNAMIC_CANVAS_ID}">
-						<img id="${PLAYER_ID}" src="${playerImageUri}" />
-						<img id="${BALL_ID}" src="${ballImageUri}"/>
+						
 					</canvas>
                     <canvas id="${STATIC_CANVAS_ID}">
+						
+					</canvas>
+						<img id="${PLAYER_ID}" src="${playerImageUri}" />
+						<img id="${PLAYER_SHOOTING_ID}" src="${playerShootingImageUri}" />
+						<img id="${PLAYER_RUNNING1_ID}" src="${playerRunning1ImageUri}" />
+						<img id="${PLAYER_RUNNING2_ID}" src="${playerRunning2ImageUri}" />
+						<img id="${BALL_ID}" src="${ballImageUri}"/>
 						<img id="${RIM_ID}" src="${rimImageUri}"/>
 						<img id="${BACKBOARD_ID}" src="${backBoardImageUri}"/>
 						<img id="${POLE_ID}" src="${poleImageUri}"/>
 						<img id="${GROUND_ID}" src="${groundImageUri}"/>
-					</canvas>
                 </div>
 				
 				<script nonce="${nonce}" src="${scriptUri}"></script>

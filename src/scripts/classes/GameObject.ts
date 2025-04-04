@@ -11,7 +11,7 @@ export class GameObject {
       this.image = this.getImageElement(id);
     }
   
-    private getImageElement(id: string): HTMLImageElement {
+    protected getImageElement(id: string): HTMLImageElement {
       const element = document.getElementById(id);
       if (!(element instanceof HTMLImageElement)) {
         throw new Error(`Element with ID ${id} is not a valid HTMLImageElement`);

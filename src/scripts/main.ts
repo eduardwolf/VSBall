@@ -9,6 +9,11 @@ import { GameSetup } from './classes/GameSetup';
 let dribbleOffset = 0;
 let dribbleDirection = 1; // 1 for downward, -1 for upward
 const dribbleSpeed = 1; // Speed of dribbling movement
+let runningFrame = 0;
+let lastRunningFrameTime = performance.now();
+const runningFrameInterval = 250; // ms between frames
+
+
 
 const gameSetup = new GameSetup();
 const player = gameSetup.player;
@@ -176,7 +181,6 @@ const draw = () => {
     ) {
         // Check if the ball is hitting the top of the rim
         if (ball.y + gameSetup.ball.image.naturalHeight - ball.velocityY <= gameSetup.rim.y) {
-            //TODO: score
             console.log("score");
             if (ball.isMidShot) {
                 gameSetup.score += 1;
@@ -198,9 +202,22 @@ const draw = () => {
     }*/
 
     // Draw Player
-    gameSetup.dynamicCanvasContext.drawImage(gameSetup.player.image, player.x, player.y, gameSetup.player.image.naturalWidth, gameSetup.player.image.naturalHeight);
+    let playerImg;
+    if ((keys.left || keys.right) && !player.isJumping) {
+        const currentTime = performance.now();
+        if (currentTime - lastRunningFrameTime >= runningFrameInterval) {
+            runningFrame = (runningFrame + 1) % 2;
+            lastRunningFrameTime = currentTime;
+        }
+        playerImg = runningFrame === 0 ? player.runningImage1 : player.runningImage2;
+    } else {
+        runningFrame = 0;
+        lastRunningFrameTime = performance.now();
+        playerImg = player.isJumping ? gameSetup.player.shootingImage : player.image;
+    }
+    gameSetup.dynamicCanvasContext.drawImage(playerImg, player.x, player.y, playerImg.naturalWidth, playerImg.naturalHeight);
     // Draw Ball
-    gameSetup.dynamicCanvasContext.drawImage(gameSetup.ball.image, ball.x, ball.y, gameSetup.ball.image.naturalWidth, gameSetup.ball.image.naturalHeight);
+    gameSetup.dynamicCanvasContext.drawImage(ball.image, ball.x, ball.y, gameSetup.ball.image.naturalWidth, gameSetup.ball.image.naturalHeight);
 
     // Display score
     gameSetup.dynamicCanvasContext.font = `${gameSetup.dynamicCanvas.width / 40 + gameSetup.dynamicCanvas.height / 40 + gameSetup.score * 1}px Arial`; // Scale font size dynamically
