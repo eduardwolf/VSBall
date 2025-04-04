@@ -1,6 +1,7 @@
 {
   "name": "vsball",
   "displayName": "VSBALL",
+  "icon": "media/icon.png",
   "description": "Basketball in VSCode",
   "version": "0.0.1",
   "engines": {

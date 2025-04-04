@@ -11,7 +11,7 @@ Basketball shootaround in VSCode.
 - Holding down space increases shot distance, peak power at the highest point of the jump
 - Score
 
-![Showcase](media/showcase.png)
+![Showcase](https://github.com/eduardwolf/VSBall/blob/main/media/showcase.png)
 
 
 ### Future updates
